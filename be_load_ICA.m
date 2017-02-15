@@ -6,7 +6,7 @@ function EEG = be_load_ICA(EEG,p,sub,IDX)
 % Loads the selected one, or if you provided an IDX loads the one on the
 % IDX
 % sample: mv_load_ICA(EEG,p,2) % adds the second ICA e.g. p.amica.path{2}
-p = mof_generate_paths(p);
+p = be_generate_paths(p);
 if ~check_EEG(EEG.preprocess,'Ica')
     
     if length(p.amica(sub).path) > 1 && sum(cellfun(@(x)length(x),p.amica(sub).date)==20)>1 % the second one is to check whether there was actually an amica, or whether it is just the empty folder

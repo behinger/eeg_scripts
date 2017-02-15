@@ -1,14 +1,22 @@
-function EEG = be_reject_channel(EEG,p,varargin)
+function EEG = be_reject_channel(EEG,p,sub,varargin)
 
-if nargin == 3
-    silent = 1;
+if nargin > 3 && ~isstr(varargin{1})
+   cfg.silent = 1;
+   cfg.rej_channel = varargin{1};
+   assert(~isempty(cfg.rej_channel),'Given noisy channels are empty')
 else
-    silent = 0;
+    cfg = finputcheck(varargin,...
+    {'silent','boolean',[],0;});
 end
-if ~check_EEG(EEG.setname,'Noisychannel')
-    
-    if exist(p.full.badChannel,'file')==2
-        load(p.full.badChannel)
+currP = p.reject(sub);
+
+
+if ~check_EEG(EEG.setname,'badChannel')
+    if isfield(cfg,'rej_channel')
+        rej_channel = cfg.rej_channel;
+        
+    elseif exist(currP.channel,'file')==2
+        load(currP.channel)
         fprintf('Rejected Channels loaded \n')
         for i = 1:length(rej_channel)
             fprintf('%7s ,', EEG.chanlocs(rej_channel(i)).labels);
@@ -16,8 +24,8 @@ if ~check_EEG(EEG.setname,'Noisychannel')
         fprintf('\n')
         fprintf('%7i ,', rej_channel(:))
         fprintf('\n')
-        if silent
-            askAppendOverwrite = 'u'
+        if cfg.silent
+            askAppendOverwrite = 'u';
         else
         askAppendOverwrite = input('Overwrite old rejection channels? (o)verwrite/(a)ppend/(u)se old/(c)ancel: ','s');
         end
@@ -65,16 +73,16 @@ if ~check_EEG(EEG.setname,'Noisychannel')
         askAppendOverwrite = [];
     end
     
-    if ~isdir(p.path.reject),          mkdir(p.path.reject);     end
-    if exist(p.full.badChannel,'file')==2 && (~exist('askAppendOverwrite','var') || ~strcmp(askAppendOverwrite,'u'))
-        copyfile(p.full.badChannel,[p.full.badChannel '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
+    if ~isdir(p.rejectpath),          mkdir(p.rejectpath);     end
+    if exist(currP.channel ,'file')==2 && (~exist('askAppendOverwrite','var') || ~strcmp(askAppendOverwrite,'u'))
+        copyfile(currP.channel ,[currP.channel '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
         fprintf('Backup created \n')
-        save(p.full.badChannel,'rej_channel');
+        save(currP.channel ,'rej_channel');
 
     end
     
     EEG = pop_select( EEG,'nochannel',rej_channel);
-    EEG.preprocess = [EEG.preprocess 'Noisychannel'];
+    EEG.preprocess = [EEG.preprocess '_badChannel'];
     
     
 end

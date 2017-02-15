@@ -29,9 +29,16 @@ elseif strcmp(p.data(sub).eeg(end-3:end),'vhdr')
     
 end
 
+% Deblanking, sometimes there are weird characters in the type. Especially
+% with ANT systems
+for e = 1:length(EEG.event)
+    EEG.event(e).type = deblank(EEG.event(e).type);
+end
+    
+
 EEG.preprocessInfo.import.Date = datestr(now);
 tmp = dir(p.data(sub).eeg);
 EEG.preprocessInfo.import.rawFileInfo = tmp;
-EEG.filepath = fullfile(p.setpath,num2str(sub))
+EEG.filepath = fullfile(p.setpath,num2str(sub));
 EEG.preprocess = []; %init the preprocessing field used for the filename
 EEG = eeg_checkset(EEG);

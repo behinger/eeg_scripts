@@ -1,21 +1,11 @@
 
-
 function [EEG, reject] = be_clean_trials(EEG,p,sub,varargin)
-%function [EEG, reject] = be_clean_trials(EEG,p,sub,[silent=1/0])
+%function [EEG, reject] = be_clean_trials(EEG,p,sub,[cfg.silent=1/0])
 global rej 
 
+cfg = finputcheck(varargin,...
+    {'silent','boolean',[],0;});
 
-silent = 0;
-if nargin > 3
-    for l = 1:length(varargin)
-        if isnumeric(varargin{l})
-            silent = 1;
-        else
-            error('unkown varargin in be_clean_trials')
-        end
-    end
-    
-end
 
 if nargin <3
     error('not enough input arguments to be_clean_trials')
@@ -26,18 +16,17 @@ EEG = eeg_checkset(EEG);
 if exist(p.reject(sub).trial,'file')==2
     tmpRej = load(p.reject(sub).trial);
     reject =tmpRej.reject;
+    fprintf('found old rejection file, loading it')
    
 end
 
-tmp = dir(p.reject(sub).trial);
-fprintf('Reject Structure: \n',tmp.date)
 if exist('reject')
-fprintf('%i,',reject),fprintf('\n')
+    fprintf('%i,',reject),fprintf('\n')
 end
-if silent
+if cfg.silent
     askAppendOverwrite = input('Manualy clean? (y)/(n): ','s');
 else
-    askAppendOverwrite = 'silent';
+    askAppendOverwrite = 'cfg.silent';
 end
 
 
@@ -52,7 +41,7 @@ switch askAppendOverwrite
         uiwait;
         reject = rej;
         resave = 1;
-    case {'n','silent'}
+    case {'n','cfg.silent'}
         resave = 0;
         
     otherwise

@@ -1,25 +1,16 @@
 function [EEG] = be_clean_continuous(EEG,p,sub,varargin)
 %% Cleaning function
-%Example Call
-%  [EEG] = mv_clean_continuous(EEG,p)
-% Checks whether file is already cleaned, asks user what to do if so
-%
-% [EEG] = mv_clean_continuous(EEG,p,1)
-% Does not ask user and simply rejects the data
+
 global rej
 rej = [];
-% If there is an additional Input, that is not a char, then go silently and
-% simply use the available cleaning times. This is for grid use
-if nargin == 4 && ~ischar(varargin{1})
-    silent = varargin{1};
-else
-    %Else simply run the script
-    silent = 0;
-end
+
+
+cfg = finputcheck(varargin,...
+    {'silent','boolean',[],0;});
 
 resave = 0;
 
-if  silent == 0;
+if  cfg.silent == 0
     cleanerName = input('Your name: ','s');
 end
 % Check if the file already exists
@@ -28,32 +19,29 @@ if exist(p.reject(sub).continuous,'file')==2
     tmpRej = load(p.reject(sub).continuous);
     fnRej = fieldnames(tmpRej);
     rej = tmpRej.(fnRej{1});
-   
+    
     fprintf('Rejections loaded \n')
     % Check whether an empty (temporary) file has been made
     if exist('tmp','var')
-        warning('Loaded Rejections were Empty! MAYBE SOMEONE ELSE IS CURRENTLY CLEANING THE FILE')
+        warning('Loaded Rejections were Empty!')
     else %if not temporary, check Samplingrate
         
         if isempty(rej)
             warning('Rejection are empty please overwrite')
         else
-            %                 if EEG.srate ~= sampRate
-            %                     error('Cleaning Sampling Rate (%i) is different from EEG sampling Rate (%i)\n',sampRate,EEG.srate)
-            %                 end
             if size(rej,2)-5 ~= EEG.nbchan
                 rej = [rej(:,1:5) zeros(EEG.nbchan,size(rej,1))'];
-                fprintf('Last time the Data had been cleaned with different number of channels, fixing it!\n ')
+                warning('Last time the Data had been cleaned with different number of channels, fixing it!\n ')
             end
         end
     end
     
-    % If silent, the cleaningInput should be "use old"
-    if silent
+    % If cfg.silent, the cleaningInput should be "use old"
+    if cfg.silent
         cleaningInput='u';
         % if Cleaning Check, we want to see the cleaning Times and use
         % Append
-    
+        
     else
         %Else we ask what the user wants
         cleaningInput = input('Old cleaning times found: (o)verwrite, (u)se old cleaning, (a)ppend, (c)ancel y/n: ','s');
@@ -70,8 +58,8 @@ if exist(p.reject(sub).continuous,'file')==2
         if isempty(rej)
             fprintf('The old Rejections were empty, (a)ppend does the same thing as (o)verwrite \n');
         else
-            if size(rej,2)-5 ~= EEG.nbchan,
-                error('This should not happen anymore, contact Bene rej: %i, cleaning: %i \n \n',size(rej,2)-5,EEG.nbchan);
+            if size(rej,2)-5 ~= EEG.nbchan
+                error('Different cleaned channels vs. EEG channels found. This should not happen anymore, rej: %i, cleaning: %i \n \n',size(rej,2)-5,EEG.nbchan);
                 
             end
         end
@@ -85,7 +73,7 @@ if exist(p.reject(sub).continuous,'file')==2
         end
         resave = 1;
         
-        % If we cancel, thwrow an error
+        % If we cancel, throw an error
     elseif strcmp(cleaningInput,'c') %
         error('User canceled the cleaning-action')
         % The only possible Input now can be 'u', for continuing the
@@ -108,58 +96,59 @@ else
     %eegplot(EEG_temp.data,'srate',EEG_temp.srate,'winlength',4,'events',EEG_temp.event,'wincolor',[1 0.5 0.5],'command','rej=TMPREJ');
 end
 
-    
-    % save the times of the rejection
-    if exist(p.reject(sub).continuous,'file')==2 && ~silent && ~strcmp(cleaningInput,'u') || resave % if we find the file, and we are not on the grid and we do not continue without cleaning anything, backup!
-        copyfile(p.full.badCont,[p.reject(sub).continuous '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
-        fprintf('Backup created \n')
-    end
-    % We get the current samplingRate
 
-    currentDate = datestr(now);
-    %If not on grid and not just cleaning the Dataset, save it!
-    if ~silent && ~strcmp(cleaningInput,'u') || resave
-        if isempty(rej)
-            error('rejection was empty! Did not save and aborted')
+% save the times of the rejection
+if exist(p.reject(sub).continuous,'file')==2 && ~cfg.silent && ~strcmp(cleaningInput,'u') || resave % if we find the file, and we are not on the grid and we do not continue without cleaning anything, backup!
+    copyfile(p.full.badCont,[p.reject(sub).continuous '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
+    fprintf('Backup created \n')
+end
+% We get the current samplingRate
+
+currentDate = datestr(now);
+%If not on grid and not just cleaning the Dataset, save it!
+if ~cfg.silent && ~strcmp(cleaningInput,'u') || resave
+    if isempty(rej)
+        error('rejection was empty! Did not save and aborted')
+    end
+    
+    save(p.reject(sub).continuous,'rej','currentDate','cleanerName');
+    fprintf('Rejections saved \n')
+end
+
+% Convert and reject the marked rejections
+tmprej = eegplot2event(rej, -1);
+tmprej(:,3) = tmprej(:,3) - 0.5*EEG.srate; %assuming cutoff -6dB is 0.5Hz!
+tmprej(:,4) = tmprej(:,4) + 0.5*EEG.srate; %assuming cutoff -6dB is 0.5Hz!
+tmprej(tmprej(:,3)<1,3) = 1;
+tmprej(tmprej(:,4)>EEG.pnts,4) = EEG.pnts;
+% Sorting the values
+[~,sIdx] = sort(tmprej(:,3));
+tmprej = tmprej(sIdx,:);
+
+% Sort them, there used to be a bug in EEGLAB and this fixes it.
+throw_out = nan;
+while ~isempty(throw_out)
+    throw_out = [];
+    for i = 1:size(tmprej,1)-1
+        if tmprej(i,4)>=tmprej(i+1,3)
+            throw_out=[throw_out i+1];
+            tmprej(i,3) = min(tmprej(i,3),tmprej(i+1,3));
+            tmprej(i,4) = max(tmprej(i,4),tmprej(i+1,4));
         end
         
-        save(p.reject(sub).continuous,'rej','currentDate','cleanerName');
-        fprintf('Rejections saved \n')
+        
     end
-    
-    % Convert and reject the marked rejections
-    tmprej = eegplot2event(rej, -1);
-    tmprej(:,3) = tmprej(:,3) - 0.5*EEG.srate; %assuming cutoff -6dB is 0.5Hz!
-    tmprej(:,4) = tmprej(:,4) + 0.5*EEG.srate; %assuming cutoff -6dB is 0.5Hz!
-    tmprej(tmprej(:,3)<1,3) = 1;
-    tmprej(tmprej(:,4)>EEG.pnts,4) = EEG.pnts;
-    % Sorting the values
-    [~,sIdx] = sort(tmprej(:,3));
-    tmprej = tmprej(sIdx,:);
-    
-    throw_out = nan;
-    while ~isempty(throw_out)
-        throw_out = [];
-        for i = 1:size(tmprej,1)-1
-            if tmprej(i,4)>=tmprej(i+1,3)
-                throw_out=[throw_out i+1];
-                tmprej(i,3) = min(tmprej(i,3),tmprej(i+1,3));
-                tmprej(i,4) = max(tmprej(i,4),tmprej(i+1,4));
-            end
-            
-            
-        end
-        tmprej(throw_out,:) = [];
-    end
-    
-    if ~strcmp(cleaningInput,'a')
-        tmprej(:,3:4) = round(tmprej(:,3:4));
-    end
-    [EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
-    
-    %Save it in the preprocess unit.
-    EEG.preprocessInfo.tmprej = tmprej;
-    EEG.preprocessInfo.cleanContDate = datestr(now);
-    EEG.preprocess = [EEG.preprocess '_contClean'];
-    %     end
+    tmprej(throw_out,:) = [];
+end
+
+if ~strcmp(cleaningInput,'a')
+    tmprej(:,3:4) = round(tmprej(:,3:4));
+end
+[EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
+
+%Save it in the preprocess unit.
+EEG.preprocessInfo.tmprej = tmprej;
+EEG.preprocessInfo.cleanContDate = datestr(now);
+EEG.preprocess = [EEG.preprocess '_contClean'];
+%     end
 end
