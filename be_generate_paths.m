@@ -16,10 +16,11 @@ pStruct.mainpath = folder;
 pStruct.datapath = fullfile( pStruct.mainpath ,'data');
 rawPathDir =dir(pStruct.datapath);
 for k = 3:length(rawPathDir) % skipping '.' and '..'
-    
+
     subjectName= rawPathDir(k).name; % subject name
     [s,e] = regexp(subjectName,'[0-9]{1,2}');
     subject_nr = str2num(subjectName(s:e));
+        
     assert(isnumeric(subject_nr))
     
     % just in case we fuck up and have multiple sets or something I

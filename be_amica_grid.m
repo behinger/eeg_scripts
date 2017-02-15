@@ -5,7 +5,7 @@ if nargin < 1
     error('You have to define the structure ''p'' with the function generate_paths')
 end
 
-p = mof_generate_paths(p);
+p = be_generate_paths(p);
 
 
 
