@@ -38,6 +38,6 @@ end
 
 
 cmd_grid = [
-    'init_mof;p = mof_generate_paths(''/net/store/nbp/projects/mof'');runamica12(p.eegset(' num2str(sub) ').path{' num2str(chosenSet) '},''outdir'',''' p.amica(sub).path{amicaChosenPath} ''',''num_models'',1,''share_comps'',1,'...
+    'init_' p.project ';p = be_generate_paths(''' p.mainpath ''');runamica12(p.eegset(' num2str(sub) ').path{' num2str(chosenSet) '},''outdir'',''' p.amica(sub).path{amicaChosenPath} ''',''num_models'',1,''share_comps'',1,'...
     ' ''do_reject'',1,''numrej'',5,''rejsig'',3,''max_threads'',7)']
 nbp_grid_start_cmd(cmd_grid,'jobnum',1,'requ','mem=5G,h=!ramsauer.ikw.uni-osnabrueck.de','out',fullfile(p.mainpath,'gridlogs'),'parallel',7)
