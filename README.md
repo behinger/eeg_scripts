@@ -1,6 +1,6 @@
 Current pipeline looks like this:
 
-```
+```matlab
 cfg = struct();
 cfg.subject = 1;
 p = be_generate_paths('/net/store/nbp/projects/mof');
