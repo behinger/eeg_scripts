@@ -29,12 +29,14 @@ end
 
 EEG = eeg_checkset(EEG);
 
-if exist(p.reject(sub).ica,'file')==2
-    reject = load(p.reject(sub).ica);
+if exist(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'file')==2
+    reject = load(p.reject(sub).ica{EEG.preprocessInfo.chosenICA});
     reject = reject.reject;
-    tmp = dir(p.reject(sub).ica);
+    tmp = dir(p.reject(sub).ica{EEG.preprocessInfo.chosenICA});
     fprintf('%s: Reject \n',tmp.date)
     fprintf('%i,',find(reject==1)),fprintf('\n')
+else
+    reject = 0;
 end
 
 
@@ -52,7 +54,9 @@ switch askAppendOverwrite
     case 'y'
         EEG.reject.gcompreject = EEG.reject.gcompreject==1 | reject == 1;
         EEG = pop_selectcomps_behinger(EEG,1:EEG.nbchan);
+        
         uiwait;            fprintf('press any key to continue \n')            ,pause
+        
         reject = EEG.reject.gcompreject;
         resave = 1;
     case {'n','silent'}
@@ -62,11 +66,11 @@ switch askAppendOverwrite
         error('User Canceled \n')
 end
 
-if exist(p.reject(sub).ica,'file')==2 && resave
-    copyfile(p.reject(sub).ica,[p.reject(sub).ica '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
+if exist(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'file')==2 && resave
+    copyfile(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},[p.reject(sub).ica{EEG.preprocessInfo.chosenICA } '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
     fprintf('Backup created \n')
 end
 if resave
-    save(p.reject(sub).ica,'reject');
+    save(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'reject');
     fprintf('Components Saved \n')
 end
