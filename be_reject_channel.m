@@ -77,9 +77,10 @@ if ~check_EEG(EEG.setname,'badChannel')
     if exist(currP.channel ,'file')==2 && (~exist('askAppendOverwrite','var') || ~strcmp(askAppendOverwrite,'u'))
         copyfile(currP.channel ,[currP.channel '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
         fprintf('Backup created \n')
-        save(currP.channel ,'rej_channel');
-
     end
+    save(currP.channel ,'rej_channel');
+
+    
     
     EEG = pop_select( EEG,'nochannel',rej_channel);
     EEG.preprocess = [EEG.preprocess '_badChannel'];

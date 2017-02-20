@@ -79,15 +79,23 @@ for k = 3:length(rawPathDir) % skipping '.' and '..'
         end
         
         pStruct.amica(subject_nr).path{end+1} = fullfile(amicaSubjectPath,['amica_run_' num2str(biggestICA+1)]);
-        pStruct.amica(subject_nr).date{end+1} = [date];
+        pStruct.amica(subject_nr).date{end+1} = [];
     end
     
     
         %%
     pStruct = generate_folder(pStruct,subject_nr,'set','setpath','eegset','*.set');
     pStruct = generate_folder(pStruct,subject_nr,'postprocessing','postprocessingpath','postprocessing','*.*');
-    pStruct = generate_folder(pStruct,subject_nr,'reject','rejectpath','reject',{'channel.mat','continuous.mat','ica.mat','trial.mat'},0);
+    pStruct = generate_folder(pStruct,subject_nr,'reject','rejectpath','reject',{'channel.mat','continuous.mat','trial.mat'},0);
+    
+    % Generate one rejection file per AMICA folder
+    pStruct.reject(subject_nr).ica = {};
+    basepath = pStruct.reject(subject_nr).mainpath;
 
+    for k = find(cellfun(@(x)~isempty(x),pStruct.amica(subject_nr).date))    
+        pStruct.reject(subject_nr).ica(end+1) = {fullfile(basepath,sprintf('ICA_run_%i_date_%s.mat',k,pStruct.amica(subject_nr).date{k}))};       
+    end
+% 
     
 end
 pStruct.subjects = 1:length(pStruct.data);
@@ -117,8 +125,6 @@ end
         tmp = dir(fullfile(setSubjectPath,fileending));
         tmp(cellfun(@(x)all(unique(x) == '.'),{tmp(:).name})) = []; % remove '.' and '...'
             
-        %         tmp(1:2) = []; % remove '.' and '..'
-        %     end
         if ~isempty(tmp)
             pStruct.(fieldSubjectName)(subject_nr).path{1} = fullfile(setSubjectPath,tmp(1).name);
             pStruct.(fieldSubjectName)(subject_nr).date{1} = [tmp(1).date];

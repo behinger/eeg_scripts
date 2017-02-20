@@ -5,6 +5,6 @@ function EEG = be_reref(EEG,p,sub)
         % remove a 'random' channel due to rankreduction with av-ref
         EEG = pop_select(EEG,'nochannel',find(cellfun(@(x)~isempty(x),regexpi({EEG.chanlocs.labels},'^FCz'))));
     end
-    EEG.preprocess = [EEG.preprocess 'Refav'];
+    EEG.preprocess = [EEG.preprocess '_refav'];
     EEG.preprocessInfo.reference = 'AVG';
 end
