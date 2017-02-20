@@ -91,7 +91,7 @@ else
         'events',EEG.event,'wincolor',[1 0.5 0.5],'command','global rej,rej=TMPREJ'...
         ,'eloc_file',EEG.chanlocs);
     uiwait;
-    resave = 1;
+    resave = 0;
     % use this for temporary filter
     %eegplot(EEG_temp.data,'srate',EEG_temp.srate,'winlength',4,'events',EEG_temp.event,'wincolor',[1 0.5 0.5],'command','rej=TMPREJ');
 end
@@ -99,7 +99,7 @@ end
 
 % save the times of the rejection
 if exist(p.reject(sub).continuous,'file')==2 && ~cfg.silent && ~strcmp(cleaningInput,'u') || resave % if we find the file, and we are not on the grid and we do not continue without cleaning anything, backup!
-    copyfile(p.full.badCont,[p.reject(sub).continuous '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
+    copyfile(p.reject(sub).continuous,[p.reject(sub).continuous '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
     fprintf('Backup created \n')
 end
 % We get the current samplingRate
