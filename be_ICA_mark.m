@@ -8,15 +8,18 @@ function [EEG reject] = be_ICA_mark(EEG,p,sub,varargin)
 %  be_ICA_mark(EEG,p)
 % add the rejections to EEG
 %  EEG = be_ICA_mark(EEG,p,1)
+global rej
+% check
+% % glbal EEG
+% if isstruct(EEG)
+%     warning('Local EEG found, but this is a function call (be_ICA_mark). Will overwrite the local EEG if manual cleaning was asked!!!')
+% end
 silent = 0;
 if nargin > 3
     for l = 1:length(varargin)
         if isnumeric(varargin{l})
             silent = 1;
-        elseif isstruct(varargin{l})
-            newReject = varargin{l};
-            
-        else
+        
             error('unkown varargin in be_ICA_mark')
         end
     end
@@ -53,11 +56,16 @@ end
 switch askAppendOverwrite
     case 'y'
         EEG.reject.gcompreject = EEG.reject.gcompreject==1 | reject == 1;
-        EEG = pop_selectcomps_behinger(EEG,1:EEG.nbchan);
         
-        uiwait;            fprintf('press any key to continue \n')            ,pause
         
-        reject = EEG.reject.gcompreject;
+        [handles] = pop_selectcomps_behinger(EEG,1:EEG.nbchan);
+        waitfor(handles)
+        fprintf('press any key to continue \n')            ,pause
+        
+        reject = rej;%EEG.reject.gcompreject;
+        fprintf('marked components:')
+        fprintf('%i,',find(reject))
+        fprintf('\n')
         resave = 1;
     case {'n','silent'}
         EEG.reject.gcompreject = reject;
