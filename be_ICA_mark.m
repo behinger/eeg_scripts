@@ -9,6 +9,7 @@ function [EEG reject] = be_ICA_mark(EEG,p,sub,varargin)
 % add the rejections to EEG
 %  EEG = be_ICA_mark(EEG,p,1)
 global rej
+rej = 0;
 % check
 % % glbal EEG
 % if isstruct(EEG)
