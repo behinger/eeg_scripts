@@ -1,4 +1,5 @@
 function [] = be_amica_grid(p,sub,varargin)
+% varargin => Dataset, AMICA-folder, 'runlocally'
 %function [] = be_amica_grid(p,sub,[setid],[amicaid])
 
 if nargin < 1
@@ -25,7 +26,7 @@ end
 
 
 if nargin>3
-    chosenAmica = varargin{2};
+    amicaChosenPath = varargin{2};
 elseif length(p.amica(sub).path)>1
     for i = 1:length(p.amica(sub).path)
         fprintf('%i : %s  \n',i,p.amica(sub).path{i})
@@ -40,4 +41,12 @@ end
 cmd_grid = [
     'init_' p.project ';p = be_generate_paths(''' p.mainpath ''');runamica12(p.eegset(' num2str(sub) ').path{' num2str(chosenSet) '},''outdir'',''' p.amica(sub).path{amicaChosenPath} ''',''num_models'',1,''share_comps'',1,'...
     ' ''do_reject'',1,''numrej'',5,''rejsig'',3,''max_threads'',7)']
-nbp_grid_start_cmd(cmd_grid,'jobnum',1,'requ','mem=5G,h=!ramsauer.ikw.uni-osnabrueck.de','out',fullfile(p.mainpath,'gridlogs'),'parallel',7)
+
+if nargin > 4 && strcmp(varargin{3},'runlocal')
+    %run locally
+    eval(cmd_grid)
+else
+    % run on grid
+    nbp_grid_start_cmd(cmd_grid,'jobnum',1,'requ','mem=5G,h=!ramsauer.ikw.uni-osnabrueck.de','out',fullfile(p.mainpath,'gridlogs'),'parallel',7)
+
+end

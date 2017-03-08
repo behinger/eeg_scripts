@@ -4,12 +4,7 @@ Current pipeline looks like this:
 cfg = struct();
 cfg.subject = 1;
 p = be_generate_paths('/net/store/nbp/projects/mof');
- if isfield(p.eegset(cfg.subject),'path') && isempty(p.eegset(cfg.subject).path) && length(p.eegset(cfg.subject).path) == 2
-        EEG = be_load_set(p,cfg.subject,2); %is there a filtered subject already? Load it
-  else
-    if isfield(p.eegset(cfg.subject),'path') && isempty(p.eegset(cfg.subject).path)
-        EEG = be_load_set(p,cfg.subject,1); %is there a filtered subject already? Load it
-    else
+ 
         EEG = be_import(p,cfg.subject); % import subject
         
         % Load Channels

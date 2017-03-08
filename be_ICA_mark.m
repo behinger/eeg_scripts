@@ -72,7 +72,7 @@ switch askAppendOverwrite
         EEG.reject.gcompreject = reject;
         resave = 0;
     otherwise
-        error('User Canceled \n')
+ee        error('User Canceled \n')
 end
 
 if exist(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'file')==2 && resave

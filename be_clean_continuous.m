@@ -17,8 +17,8 @@ end
 if exist(p.reject(sub).continuous,'file')==2
     %Load it
     tmpRej = load(p.reject(sub).continuous);
-    fnRej = fieldnames(tmpRej);
-    rej = tmpRej.(fnRej{1});
+    %fnRej = fieldnames(tmpRej);
+    rej = tmpRej.rej;
     
     fprintf('Rejections loaded \n')
     % Check whether an empty (temporary) file has been made
@@ -35,70 +35,59 @@ if exist(p.reject(sub).continuous,'file')==2
             end
         end
     end
+elseif cfg.silent
+    error('no cleaning file found, please clean your data first before using silent=1')
+end
+% If cfg.silent, the cleaningInput should be "use old"
+if cfg.silent
+    cleaningInput='u';
+    % if Cleaning Check, we want to see the cleaning Times and use
+    % Append
     
-    % If cfg.silent, the cleaningInput should be "use old"
-    if cfg.silent
-        cleaningInput='u';
-        % if Cleaning Check, we want to see the cleaning Times and use
-        % Append
-        
-    else
-        %Else we ask what the user wants
-        cleaningInput = input('Old cleaning times found: (o)verwrite, (u)se old cleaning, (a)ppend, (c)ancel y/n: ','s');
-    end
-    %If we overwrite, we simply ask the user to clean again
-    if strcmp(cleaningInput,'o')
-        eegplot(EEG.data,'srate',EEG.srate,'winlength',8, ...
-            'events',EEG.event,'wincolor',[1 0.5 0.5],'command','global rej,rej=TMPREJ',...
-            'eloc_file',EEG.chanlocs);
-        uiwait;
-        resave = 1;
-        %If we append, we use the old rejectiontimes for 'winrej'
-    elseif strcmp(cleaningInput,'a')
-        if isempty(rej)
-            fprintf('The old Rejections were empty, (a)ppend does the same thing as (o)verwrite \n');
-        else
-            if size(rej,2)-5 ~= EEG.nbchan
-                error('Different cleaned channels vs. EEG channels found. This should not happen anymore, rej: %i, cleaning: %i \n \n',size(rej,2)-5,EEG.nbchan);
-                
-            end
-        end
-        eegplot(EEG.data,'srate',EEG.srate,'winlength',8, ...
-            'events',EEG.event,'wincolor',[1 0.5 0.5],'command','global rej,rej=TMPREJ',...
-            'eloc_file',EEG.chanlocs,'winrej',sort(rej)./(sampRate/EEG.srate));
-        uiwait;
-        
-        if strcmp(input('Do you really want to append (y)es/(a)bort :','s'),'a')
-            error('User Aborted')
-        end
-        resave = 1;
-        
-        % If we cancel, throw an error
-    elseif strcmp(cleaningInput,'c') %
-        error('User canceled the cleaning-action')
-        % The only possible Input now can be 'u', for continuing the
-        % cleaning
-    elseif ~strcmp(cleaningInput,'u')
-        error('User gave impossible input')
-    end
-    
-    %If the file does not exist simply clean (same as 'o')
 else
-    tmp=[];
-    cleaningInput = 'firstRun';
-    
-    eegplot(EEG.data,'srate',EEG.srate,'winlength', 8,...
-        'events',EEG.event,'wincolor',[1 0.5 0.5],'command','global rej,rej=TMPREJ'...
-        ,'eloc_file',EEG.chanlocs);
+    %Else we ask what the user wants
+    cleaningInput = input('Old cleaning times found: (o)verwrite, (u)se old cleaning, (a)ppend, (c)ancel y/n: ','s');
+end
+%If we overwrite, we simply ask the user to clean again
+if strcmp(cleaningInput,'o')
+    eegplot(EEG.data,'srate',EEG.srate,'winlength',8, ...
+        'events',EEG.event,'wincolor',[1 0.5 0.5],'command','global rej,rej=TMPREJ',...
+        'eloc_file',EEG.chanlocs);
     uiwait;
-    resave = 0;
-    % use this for temporary filter
-    %eegplot(EEG_temp.data,'srate',EEG_temp.srate,'winlength',4,'events',EEG_temp.event,'wincolor',[1 0.5 0.5],'command','rej=TMPREJ');
+    resave = 1;
+    %If we append, we use the old rejectiontimes for 'winrej'
+elseif strcmp(cleaningInput,'a')
+    if isempty(rej)
+        fprintf('The old Rejections were empty, (a)ppend does the same thing as (o)verwrite \n');
+    else
+        if size(rej,2)-5 ~= EEG.nbchan
+            error('Different cleaned channels vs. EEG channels found. This should not happen anymore, rej: %i, cleaning: %i \n \n',size(rej,2)-5,EEG.nbchan);
+            
+        end
+    end
+    eegplot(EEG.data,'srate',EEG.srate,'winlength',8, ...
+        'events',EEG.event,'wincolor',[1 0.5 0.5],'command','global rej,rej=TMPREJ',...
+        'eloc_file',EEG.chanlocs,'winrej',sort(rej));
+    uiwait;
+    
+    if strcmp(input('Do you really want to append (y)es/(a)bort :','s'),'a')
+        error('User Aborted')
+    end
+    resave = 1;
+    
+    % If we cancel, throw an error
+elseif strcmp(cleaningInput,'c') %
+    error('User canceled the cleaning-action')
+    % The only possible Input now can be 'u', for continuing the
+    % cleaning
+elseif ~strcmp(cleaningInput,'u')
+    error('User gave impossible input')
 end
 
 
+
 % save the times of the rejection
-if exist(p.reject(sub).continuous,'file')==2 && ~cfg.silent && ~strcmp(cleaningInput,'u') || resave % if we find the file, and we are not on the grid and we do not continue without cleaning anything, backup!
+if exist(p.reject(sub).continuous,'file')==2 && (~cfg.silent && ~strcmp(cleaningInput,'u') || resave) % if we find the file, and we are not on the grid and we do not continue without cleaning anything, backup!
     copyfile(p.reject(sub).continuous,[p.reject(sub).continuous '.bkp' datestr(now,'mm-dd-yyyy_HH-MM-SS')]);
     fprintf('Backup created \n')
 end
@@ -130,11 +119,15 @@ throw_out = nan;
 while ~isempty(throw_out)
     throw_out = [];
     for i = 1:size(tmprej,1)-1
+        if ~isempty(throw_out) && throw_out(end) == i
+            continue
+        end
         if tmprej(i,4)>=tmprej(i+1,3)
             throw_out=[throw_out i+1];
             tmprej(i,3) = min(tmprej(i,3),tmprej(i+1,3));
             tmprej(i,4) = max(tmprej(i,4),tmprej(i+1,4));
         end
+        
         
         
     end

@@ -100,7 +100,8 @@ for k = 3:length(rawPathDir) % skipping '.' and '..'
 end
 pStruct.subjects = 1:length(pStruct.data);
 pStruct.subjects(cellfun(@(x)isempty(x),{pStruct.data(:).subject})) = nan;
-pStruct.project = 'mof';
+[~,projName] = fileparts(pStruct.mainpath);
+pStruct.project = projName;
 end
 
 

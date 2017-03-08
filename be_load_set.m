@@ -1,6 +1,6 @@
 function [EEG,p] = be_load_set(p,sub,varargin)
 %%  [EEG,p] = be_load_set(p,sub,[setID])
-p = mof_generate_paths(p);
+p = be_generate_paths(p);
 if ~isfield(p,'eegset')
     error('no sets found')
 end
@@ -18,6 +18,7 @@ else
 end
 if nargin ==4
     loadmode = varargin{2};
+    
 else
     loadmode ='all';
 end
