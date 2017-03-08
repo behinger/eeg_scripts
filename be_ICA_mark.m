@@ -69,7 +69,7 @@ switch askAppendOverwrite
         fprintf('\n')
         resave = 1;
     case {'n','silent'}
-        EEG.reject.gcompreject = reject;
+        %EEG.reject.gcompreject = reject;
         resave = 0;
     otherwise
 ee        error('User Canceled \n')
@@ -83,3 +83,4 @@ if resave
     save(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'reject');
     fprintf('Components Saved \n')
 end
+EEG.reject.gcompreject = reject;
