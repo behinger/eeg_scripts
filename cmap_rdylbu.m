@@ -81,7 +81,7 @@ else
         69   117   180;
         49    54   149];
     
-    colormap=local_interpolate_cbrewer(cbrew_init, 'cubic', ncol);
+    colormap=local_interpolate_cbrewer(cbrew_init, 'pchip', ncol);
     
 end
 colormap=colormap./255;
