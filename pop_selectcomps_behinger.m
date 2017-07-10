@@ -74,7 +74,7 @@ end;
 % -----------------
 column =ceil(sqrt( length(compnum) ))+1;
 rows = ceil(length(compnum)/column);
-if ~exist('fig')
+if ~exist('fig','var')
     figure('name', [ 'Reject components by map - pop_selectcomps_behinger() (dataset: ' EEG.setname ')'], 'tag', currentfigtag, ...
         'numbertitle', 'off', 'color', BACKCOLOR);
     figHandleList = [figHandleList gcf];
@@ -122,7 +122,7 @@ count = 1;
     end
 
 for ri = compnum
-    if exist('fig')
+    if exist('fig','var')
         button = findobj('parent', fig, 'tag', ['comp' num2str(ri)]);
         if isempty(button)
             error( 'pop_selectcomps_behinger(): figure does not contain the component button');
@@ -219,12 +219,7 @@ end
 % draw the bottom button
 % ----------------------
 
-function close_function(varargin)
-    global rej
-    rej = rej|EEG.reject.gcompreject; %the or is neccesarry as the other window could have changed the rejection file already. God, I hate global variables -.-
-    delete(gcf)
-    end
-if ~exist('fig')
+if ~exist('fig','var')
     
 %     command = 'global rej;rej = EEG.reject.gcompreject;delete(gcf)';
     
@@ -246,6 +241,12 @@ end
 
 
 
+function close_function(varargin)
+    global rej
+    rej = rej|EEG.reject.gcompreject; %the or is neccesarry as the other window could have changed the rejection file already. God, I hate global variables -.-
+    delete(gcf)
+end
+    
 function com = pop_prop_behinger(EEG, typecomp, chanorcomp, winhandle, spec_opt)
 
 com = '';
