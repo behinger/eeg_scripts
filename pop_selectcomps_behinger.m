@@ -219,6 +219,12 @@ end
 % draw the bottom button
 % ----------------------
 
+function close_function(varargin)
+    global rej
+    rej = rej|EEG.reject.gcompreject; %the or is neccesarry as the other window could have changed the rejection file already. God, I hate global variables -.-
+    delete(gcf)
+end
+    
 if ~exist('fig','var')
     
 %     command = 'global rej;rej = EEG.reject.gcompreject;delete(gcf)';
@@ -241,12 +247,6 @@ end
 
 
 
-function close_function(varargin)
-    global rej
-    rej = rej|EEG.reject.gcompreject; %the or is neccesarry as the other window could have changed the rejection file already. God, I hate global variables -.-
-    delete(gcf)
-end
-    
 function com = pop_prop_behinger(EEG, typecomp, chanorcomp, winhandle, spec_opt)
 
 com = '';
