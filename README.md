@@ -27,16 +27,7 @@ try
 catch
     EEG = be_import(p,cfg.subject); 
     
-    % add chanlocs
-    if cfg.subject == 8
-        % in this subject we recorded with the second set of channels,
-        % but still have the labels of the first amplifier. Fixing this
-        EEG2 = pop_loadset('filepath',p.eegset(5).path{1},'loadmode','info'); % load a 128 Elec file
-        
-        EEG.chanlocs(1:end-1) = EEG2.chanlocs(73:end); % overwrite it
-        EEG.chanlocs(31).labels = 'Iz'; % this one in the 128E is CzOtherAmp, but here it is Iz
-    end
-    
+   
     if strcmp(p.data(cfg.subject).eeg(end-2:end),'cnt')
         %ANT  Elec
         EEG=pop_chanedit(EEG, 'lookup','/net/store/nbp/users/behinger/projects/mof/git/lib/eeglab/plugins/dipfit2.3/standard_BESA/standard-10-5-cap385.elp');
@@ -61,9 +52,10 @@ catch
     EEG = eeg_checkset(EEG);
     EEG.preprocess = [EEG.preprocess '_ET'];
     
-    % add csv
-    EEG = mof_addcsv(EEG,p,cfg.subject);
-   
+    % Add your trial-id etc here
+    % XXX
+    % this is project specific
+    
     be_save_set(EEG)
     
 end
