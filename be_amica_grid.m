@@ -37,9 +37,7 @@ else
 end
 
 
-
-cmd_grid = [
-    'init_' p.project ';p = be_generate_paths(''' p.mainpath ''');runamica12(p.eegset(' num2str(sub) ').path{' num2str(chosenSet) '},''outdir'',''' p.amica(sub).path{amicaChosenPath} ''',''num_models'',1,''share_comps'',1,'...
+cmd_grid = ['init_' p.project ';p = be_generate_paths(''' p.mainpath ''');runamica12(p.eegset(' num2str(sub) ').path{' num2str(chosenSet) '},''outdir'',''' p.amica(sub).path{amicaChosenPath} ''',''num_models'',1,''share_comps'',1,'...
     ' ''do_reject'',1,''numrej'',5,''rejsig'',3,''max_threads'',7)']
 
 if nargin > 4 && strcmp(varargin{3},'runlocal')
