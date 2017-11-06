@@ -39,7 +39,11 @@ if exist(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'file')==2
     tmp = dir(p.reject(sub).ica{EEG.preprocessInfo.chosenICA});
     fprintf('%s: Reject \n',tmp.date)
     fprintf('%i,',find(reject==1)),fprintf('\n')
+elseif isfield(EEG,'etdata')
+    EEG =     pop_eyetrackerica(EEG,{'L_saccade','R_saccade'},{'L_fixation','R_fixation'},[10 10],1.1,2,0,4);
+    reject = 0;
 else
+    
     reject = 0;
 end
 
@@ -72,7 +76,7 @@ switch askAppendOverwrite
         %EEG.reject.gcompreject = reject;
         resave = 0;
     otherwise
-ee        error('User Canceled \n')
+        error('User Canceled \n')
 end
 
 if exist(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'file')==2 && resave
