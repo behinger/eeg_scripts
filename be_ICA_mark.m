@@ -20,7 +20,7 @@ if nargin > 3
     for l = 1:length(varargin)
         if isnumeric(varargin{l})
             silent = 1;
-        
+        else
             error('unkown varargin in be_ICA_mark')
         end
     end
