@@ -11,6 +11,12 @@ if isstruct(folder) %in this case we want to update p!
     folder = folder.mainpath;
 end
 
+if ~exist(folder,'dir')
+   folder = ['e:' folder];
+    if ~exist(folder,'dir')
+        error('could not find folder')
+    end
+end
 pStruct = struct();
 pStruct.mainpath = folder;
 pStruct.datapath = fullfile( pStruct.mainpath ,'data');
