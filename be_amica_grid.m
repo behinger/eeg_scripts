@@ -45,6 +45,6 @@ if nargin > 4 && strcmp(varargin{3},'runlocal')
     eval(cmd_grid)
 else
     % run on grid
-    nbp_grid_start_cmd(cmd_grid,'jobnum',1,'requ','mem=5G,h=!ramsauer.ikw.uni-osnabrueck.de','out',fullfile(p.mainpath,'gridlogs'),'parallel',7)
+    nbp_grid_start_cmd(cmd_grid,'jobnum',1,'requ','mem=10G,h=!ramsauer.ikw.uni-osnabrueck.de','out',fullfile(p.mainpath,'gridlogs'),'parallel',7)
 
 end

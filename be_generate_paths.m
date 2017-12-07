@@ -41,7 +41,6 @@ for k = 3:length(rawPathDir) % skipping '.' and '..'
     edfFile = dir(fullfile(pStruct.datapath,subjectName,'*.edf'));
     csvFile = dir(fullfile(pStruct.datapath,subjectName,'*.csv'));
     
-    
     pStruct.data(subject_nr).subject = subjectName;
     pStruct.data(subject_nr).eeg= fullfile(pStruct.datapath,subjectName,eegFile.name);
     pStruct.data(subject_nr).edf= fullfile(pStruct.datapath,subjectName,edfFile.name);

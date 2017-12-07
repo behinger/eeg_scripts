@@ -1,4 +1,4 @@
-function EEG = be_reject_channel(EEG,p,sub,varargin)
+function EEG = be_reject_channel_2(EEG,p,sub,varargin)
 
 if nargin > 3 && ~isstr(varargin{1})
    cfg.silent = 1;
@@ -17,6 +17,11 @@ if ~check_EEG(EEG.setname,'badChannel')
         
     elseif exist(currP.channel,'file')==2
         load(currP.channel)
+         lab = {EEG.chanlocs.labels};
+       
+    % remove CzAmp2 if it 
+         rej_channel = [rej_channel find(cellfun(@(x)ismember(x,{'CzAmp2'}),lab))];
+        
         fprintf('Rejected Channels loaded \n')
         for i = 1:length(rej_channel)
             fprintf('%7s ,', EEG.chanlocs(rej_channel(i)).labels);

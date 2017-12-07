@@ -13,5 +13,12 @@ function [EEG,excludeChan]= be_removeCommonChannels(EEG,remove)
     fprintf('%s, ',lab{excludeChan})
     fprintf('\n')
     if remove
+        if isfield(EEG,'urchanlocs')
+            urlab = {EEG.urchanlocs.labels};
+            badlab = lab(excludeChan);
+            for e = length(badlab):-1:1
+                EEG.urchanlocs(strcmp(urlab,badlab{e})) = [];
+            end
+        end
         EEG = pop_select(EEG,'nochannel',excludeChan);
     end
