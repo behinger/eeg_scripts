@@ -40,10 +40,11 @@ if exist(p.reject(sub).ica{EEG.preprocessInfo.chosenICA},'file')==2
     fprintf('%s: Reject \n',tmp.date)
     fprintf('%i,',find(reject==1)),fprintf('\n')
 elseif isfield(EEG,'etdata')
+    warning('no file found, starting with eye-eeg autotool')
     EEG =     pop_eyetrackerica(EEG,{'L_saccade','R_saccade'},{'L_fixation','R_fixation'},[10 10],1.1,2,0,4);
     reject = 0;
 else
-    
+    warning('no file found, starting with empty rejections')
     reject = 0;
 end
 
