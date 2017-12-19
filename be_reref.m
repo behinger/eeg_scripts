@@ -3,7 +3,7 @@ function EEG = be_reref(EEG,p,sub)
     [~,excludeChan] = be_removeCommonChannels(EEG);
     
     EEG = pop_reref(EEG,[],'exclude',excludeChan);
-    if strcmp(p.data(sub).eeg(end-2:end),'cnt')
+    if (isstruct(p) &&    strcmp(p.data(sub).eeg(end-2:end),'cnt')) || p
         warning('ANT System detected: Removed additionally FCz to account for the rank reduction')
         % remove a 'random' channel due to rankreduction with av-ref
         remChan = find(cellfun(@(x)~isempty(x),regexpi({EEG.chanlocs.labels},'^FCz')));
