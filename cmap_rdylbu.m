@@ -1,4 +1,6 @@
 function colormap = cmap_rdylbu(ncol)
+% Colorbrewer Map, Apache-2 license (see colorbrewer_apache_license)
+% Functions slightly modified by behinger
 if nargin == 0
     ncol = 64;
 end
